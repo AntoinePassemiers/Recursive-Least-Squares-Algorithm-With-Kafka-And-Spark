@@ -1,1 +1,35 @@
 \chapter{Introduction}
+
+The objective of this assignment is to implement a scalable online algorithm
+that is able to perform forecasting in a distributed fashion.
+More specifically, such algorithm should be able to predict the values of
+some explained variables based on the values of some explanatory variables
+by having recourse to linear models. In the framework of this project,
+the Recursive Least Squares (RLS) algorithm has been privileged as it is
+capable of learning the coefficients of a linear model incrementally.
+
+The implementation extends the notebooks that have been provided
+along with the project statement. There are mainly three extensions of these
+notebooks:
+\begin{itemize}
+    \item The coefficients of the underlying linear models are generated randomly
+        using a multivariate Gaussian distribution. The parameters of the later
+        are drawn at random using a normal-Wishart distribution and fixed
+        before the learning process starts.
+        Also, multiple output/explained variables are returned instead of a single
+        one.
+    \item The system is made scalable with respect to the number of models to be
+        run in parallel. Running multiple models in parallel with different
+        hyper-parameters allows for fast validation and computation of the
+        optimal hyper-parameter values. In this project, the only hyper-parameter
+        to be tuned is the forgetting factor of the RLS algorithm.
+    \item The system is made scalable with respect to the number of explained
+        variables. When the number of output variables is low, the RLS update
+        function relies on NumPy vectorization, but is actually run in parallel
+        when the number of output variables exceeds a given threshold.
+        This design choice allows for maximum flexibility.
+\end{itemize}
+
+Data samples are sent by a Kafka producer and retrieved by a Kafka consumer
+as a Spark DStream. The later is then update the models' coefficients
+in a distributed manner. 

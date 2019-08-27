@@ -27,7 +27,7 @@
   % Mean vector and precision matrix
   \node[latent, above=3.3 of beta, xshift=1.5cm]  (Lambda)        {$\Lambda$};
   \node[latent, above=1.5 of beta, xshift=-1.5cm] (mu)        {$\mu$};
-  \factor[above=of beta] {beta-f} {right:$\beta \sim \mathcal{N}(\mu, \Lambda^{-1})$} {mu, Lambda} {beta};
+  \factor[above=of beta] {beta-f} {right:$\beta_j \sim \mathcal{N}(\mu, \Lambda^{-1})$} {mu, Lambda} {beta};
 
   % Hyper-parameters of mu
   \node[const, above=1.4 of mu, xshift=-1.6cm] (lambda0) {$\lambda_0$};
