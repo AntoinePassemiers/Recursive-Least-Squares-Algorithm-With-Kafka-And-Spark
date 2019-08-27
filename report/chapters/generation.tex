@@ -1,0 +1,48 @@
+\begin{tikzpicture}
+
+
+  % Explained variables
+  \node[latent] (y) {$y$};
+
+  % Gaussian noise
+  \node[latent, above=1.5 of y, xshift=-4.5cm] (w) {$w$};
+  \node[const, above=0.5 of w] (noisemu) {};
+  \node[const, above=0.5 of w]  (noisesigma) {};
+  \factor[above=of w] {w-f} {above:$w \sim \mathcal{N}(0, 1)$} {noisemu, noisesigma} {w};
+
+  % Observations
+  \node[obs, above=1.5 of y, xshift=-2.5cm] (x) {$x$};
+  \node[const, above=0.5 of x] (xlb) {};
+  \node[const, above=0.5 of x]  (xub) {};
+  \factor[above=of x] {x-f} {above:$x \sim \mathcal{U}(0, 1)$} {xlb, xub} {x};
+
+  % Coefficients
+  \node[latent, above=1.5 of y, xshift=2.5cm] (beta) {$\beta$};
+
+  % Connect x and w to y
+  \edge[-] {beta} {y};
+  \edge[-] {x} {y};
+  \edge[-] {w} {y};
+
+  % Mean vector and precision matrix
+  \node[latent, above=3.3 of beta, xshift=1.5cm]  (Lambda)        {$\Lambda$};
+  \node[latent, above=1.5 of beta, xshift=-1.5cm] (mu)        {$\mu$};
+  \factor[above=of beta] {beta-f} {right:$\beta \sim \mathcal{N}(\mu, \Lambda^{-1})$} {mu, Lambda} {beta};
+
+  % Hyper-parameters of mu
+  \node[const, above=1.4 of mu, xshift=-1.6cm] (lambda0) {$\lambda_0$};
+  \node[const, above=1.4 of mu, xshift=0.0cm] (mu0) {$\mu_0$};
+  \factor[above=of mu] {mu-f} {left:$\mu \sim \mathcal{N}(\mu_0, (\lambda_0 \Lambda)^{-1})$} {lambda0, mu0, Lambda} {mu};
+
+  % Hyper-parameters of Lambda
+  \node[const, above=1.0 of Lambda, xshift=-0.8cm] (nu0) {$\nu_0$};
+  \node[const, above=1.0 of Lambda, xshift=0.8cm] (W0) {$W_0$};
+  \factor[above=of Lambda] {W-f} {left:$\Lambda \sim \mathcal{W}(W_0, \nu_0)$} {W0, nu0} {Lambda};
+  
+  % Time Plate
+  \plate[xshift=0.1cm, yshift=0.0cm] {plate-t} { (w)(w-f)(x)(x-f)(y) } {$t$};
+  
+  % Output Plate
+  \plate[yshift=0.4cm] {plate-j}{ (y)(beta)(beta-f) } {$j$};
+
+\end{tikzpicture}

@@ -1,0 +1,130 @@
+\documentclass[11pt,a4paper,oneside]{thesis}
+\usepackage[hmargin={1.25in,1.25in},vmargin={1.25in,1.25in}]{geometry}
+
+\usepackage{ifxetex}
+\ifxetex
+  \usepackage{fontspec}
+\else
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{lmodern}
+\fi
+
+\makeindex
+\usepackage{textcomp}
+\usepackage{fancyhdr}
+\usepackage{makeidx}
+\usepackage{xcolor}
+\usepackage{csquotes}
+\usepackage[style=verbose-ibid,backend=bibtex,autocite=footnote]{biblatex}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{verbatim}
+\usepackage{hyperref}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{commath,mathtools}
+\usepackage{mathrsfs}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{tikz}
+\usetikzlibrary{bayesnet}
+
+\pagestyle{myheadings}
+\fancyhf{}
+\rhead[\leftmark]{thepage}
+
+% Configure hyperref
+\hypersetup{
+    colorlinks,
+    linkcolor={black!50!black},  % Intra-document links color
+    citecolor={blue!50!black}, % Citations in blue
+    urlcolor={blue!80!black}   % URLs in blue
+}
+
+% Custom commands
+\newcommand{\naatypes}{22}
+\newcommand{\todo}[1]{\textcolor{red}{TODO: #1}}
+\newcommand{\xor}{\mathbin{\oplus}}
+\renewcommand{\exp}[1]{\text{ exp}\Big(#1\Big)}
+\newcommand{\smallexp}[1]{\text{ exp}(#1)}
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+
+% Custom operators
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator{\trace}{Tr}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+\parindent0em
+\parskip1.5ex
+
+\setcounter{tocdepth}{4}
+\setcounter{secnumdepth}{4}
+
+\bibliography{report.bib}
+
+\begin{document}
+
+% \frontmatter
+\begin{titlepage}
+\begin{center}
+\textbf{UNIVERSIT\'E LIBRE DE BRUXELLES}\\
+\textbf{Facult\'{e} des Sciences}\\
+\textbf{D\'{e}partement d'Informatique}
+\vfill{}\vfill{}
+
+{\LARGE  INFO-H-515 \\
+ \vspace{0.2cm}
+ Big Data Scalable Analytics
+ \vspace*{2cm}
+ \linebreak[4] Report - Phase 2
+}
+
+\vspace{0.5cm}
+
+{\Huge \par}
+\begin{center}{Antoine Passemiers}\end{center}{\Huge \par}
+\vfill{}\vfill{}
+% \noindent\hrulefill \\
+{\large }\hfill{}{}
+%\end{flushleft}
+{\large\par}\vfill{}\vfill{}\enlargethispage{3cm}
+\textbf{Academic year 2018~-~2019}
+\end{center}
+\end{titlepage}
+
+%\newpage
+
+%\thispagestyle{empty} 
+%\null
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+\thispagestyle{empty} 
+\setcounter{page}{1}
+\tableofcontents
+\mainmatter 
+
+
+\include{chapters/introduction}
+\include{chapters/architecture}
+\include{chapters/scalability}
+\include{chapters/performance}
+\include{chapters/conclusion}
+
+\backmatter
+
+\printindex % use makeindex to generate the index
+
+%\bibliographystyle{plain}
+
+\printbibliography
+
+\end{document}

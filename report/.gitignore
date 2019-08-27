@@ -1,0 +1,11 @@
+*.acl
+*.acn
+*.aux
+*.bbl
+*.blg
+*-blx.bib
+*.idx
+*.log
+*.out
+*.run.xml
+*.toc
