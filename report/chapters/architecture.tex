@@ -46,33 +46,66 @@ the weights $\beta$ are estimated incrementally using the following formulas:
 \begin{cases}
     V^{(t)} & = \frac{1}{\nu} \Bigg( V^{(t-1)} - \frac{V^{(t-1)} x_t^T x_t V^{(t-1)}}{1 + x_t V^{(t-1)} (x_t^T} \Bigg) \\
     \alpha^{(t)} & = V^{(t)} x_t^T \\
-    e & = y^{(t)} - x_t \hat{\beta}^{(t-1)} \\
-    \hat{\beta}^{(t)} & = \hat{\beta}^{(t-1)} + \alpha^{(t)} e
+    e^{(t)} & = y^{(t)} - x_t \hat{\beta}^{(t-1)} \\
+    \hat{\beta}^{(t)} & = \hat{\beta}^{(t-1)} + \alpha^{(t)} e^{(t)}
 \end{cases}
 \end{align}
 
-where 
+where $V^{(t)}$ is a matrix of shape $n \times n$, $n$ is the number of explanatory variables
+and $e^{(t)}$ is the prediction error on the example retrieved from the Kafka consumer at time step $t$.
+In this project, the learning algorithm should be able to handle multiple output variables.
+Therefore, such formulation has to be extended to a multi-output case.
 
-First approach -- Fully-vectorized version:
+\subsection{First approach -- Fully-vectorized version}
+
+This approach is used when the number of output/explained variables is low,
+and relies on NumPy's efficient implementation of the dot-product.
+Let $B \in \mathbb{R}^{n \times m}$ denote a matrix this time.
+Each machine on the cluster computes \textbf{the whole coefficient matrix} $B$
+with a different forgetting factor.
 
 \begin{align}
 \begin{cases}
     \alpha_t & = V^{(t)} x_t^T \\
-    e & = y^{(t)} - x_t \hat{B}^{(t-1)} \\
-    \hat{B}^{(t)} & = \hat{B}^{(t-1)} + \alpha_t^T e
+    e^{(t)} & = y^{(t)} - x_t \hat{B}^{(t-1)} \\
+    \hat{B}^{(t)} & = \hat{B}^{(t-1)} + \alpha_t^T e^{(t)}
 \end{cases}
 \end{align}
 
-Second approach -- Distributed version:
+$e^{(t)} \in \mathbb{R}^m$ is vector and $e_j^{(t)}$ is the prediction error
+on the output variable $y_j$ retrieved at time $t$ from the Kafka consumer.
+
+
+\subsection{Second approach -- Distributed version}
+
+The scalability of the algorithm w.r.t. to the number of output variables
+is enabled by this second approach. However, it is actually interesting
+when the number of output variables is larger than the number of input
+variables. At this condition only, the bottleneck of the algorithm
+is the computation of $\hat{B}^{(t)}$ and not $V^{(t)}$.
+Therefore, such approach is used only when the number of output variables
+is sufficiently high. For demonstration purposes, the second approach
+is used in the notebook since the number of output variables has been
+set to $8$ and the threshold to $6$. Note that this threshold is arbitrary
+and is a user preference. In practice, I believe that a reasonable design choice
+would be to set the threshold to the vector size from which NumPy starts having
+recourse to multithreading.
 
 \begin{align}
 \begin{cases}
     \alpha_t & = V^{(t)} x_t^T \\
-    e & = y_j^{(t)} - x_t \hat{B}_{\cdot j}^{(t-1)} \\
-    \hat{B}_{\cdot j}^{(t)} & = \hat{B}_{\cdot j}^{(t-1)} + \alpha_t^T e
+    e^{(t)} & = y_j^{(t)} - x_t \hat{B}_{\cdot j}^{(t-1)} \\
+    \hat{B}_{\cdot j}^{(t)} & = \hat{B}_{\cdot j}^{(t-1)} + \alpha_t^T e^{(t)}
 \end{cases}
 \end{align}
 
+In the present approach, each machine of the cluster computes one column
+of the coefficient matrix $B$. Therefore, each node is assigned an output
+variable $j$ and re-estimates $\hat{B}_{\cdot j}^{(t)}$ at each time step $t$.
+Also, $e^{(t)}$ is a scalar and represents the prediction error on $y_j$ at time step $t$.
+
+
+\section{Architecture and Spark implementation}
 
 \begin{figure}[H]
     \begin{center}
