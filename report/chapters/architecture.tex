@@ -141,4 +141,15 @@ like the prediction error. For more details on the implementation of each transf
     \end{center}
 \end{figure}
 
-
+The architecture is scalable both with respect to the number of models and
+output variables:
+\begin{itemize}
+    \item Each model is run in parallel since each state is characterized by its key,
+        where each key is associated to a unique model.
+        It must be noted that running multiple models in parallel is an embarassingly
+        parallel task.
+    \item Each output variable is learnt in parallel (in the fully-vectorized approach only)
+        due to the flatMap transformation: each column of the coefficient matrix is assigned a differnent
+        partial state and all columnsassociated to the same model are assigned the same key.
+        All partial states sharing the same key are then grouped using a groupByKey transformation.
+\end{itemize}

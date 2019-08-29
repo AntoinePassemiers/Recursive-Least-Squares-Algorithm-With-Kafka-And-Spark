@@ -1,1 +1,14 @@
 \chapter{Conclusion}
+
+During this project, a distributed version of the RLS algorithm
+has been implemented using both Kafka distributed messaging server
+and Kafka streaming API.
+The algorithm is both scalable with respect to the number of models
+and output variables.
+It has also been observed that the speed of convergence is affected
+by the value of the global optimal, and that higher forgetting
+factors yield better performance.
+
+As future work, a dynamic forgetting factor~\cite{johnstone1982exponential} could be considered
+in order to guarantee both high convergence speed and high
+convergence rate.
