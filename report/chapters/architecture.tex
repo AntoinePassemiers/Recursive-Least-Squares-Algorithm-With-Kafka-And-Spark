@@ -28,8 +28,8 @@
   \end{figure}
 
   As can be observed from the plate notation in figure \ref{bayesnet},
-  coefficient vectors $\beta_j$ are computed only once for each $j$,
-  and $w$, $x$, $y$ are sampled at each time step $t$, where $y_j = \beta_j x$.
+  coefficient vectors $B_{\cdot j}$ are computed only once for each $j$,
+  and $w$, $x$, $y$ are sampled at each time step $t$, where $y_j = B_{\cdot j} x$.
   Mean vector $\mu$ and precision matrix $\Lambda$ are sampled only once
   from a normal-Wishart distribution.
   Default parameter matrix $W_0$ is the diagonal matrix, prior mean vector $\mu_0$
@@ -40,11 +40,11 @@
 \section{Recursive Least Squares (RLS) with forgetting factor}
 
 In the standard RLS implementation with forgetting factor,
-the weights $\beta$ are estimated incrementally using the following formulas:
+the weights $B$ are estimated incrementally using the following formulas:
 
 \begin{align}
 \begin{cases}
-    V^{(t)} & = \frac{1}{\nu} \Bigg( V^{(t-1)} - \frac{V^{(t-1)} x_t^T x_t V^{(t-1)}}{1 + x_t V^{(t-1)} (x_t^T} \Bigg) \\
+    V^{(t)} & = \frac{1}{\nu} \Bigg( V^{(t-1)} - \frac{V^{(t-1)} x_t^T x_t V^{(t-1)}}{1 + x_t V^{(t-1)} x_t^T} \Bigg) \\
     \alpha^{(t)} & = V^{(t)} x_t^T \\
     e^{(t)} & = y^{(t)} - x_t \hat{\beta}^{(t-1)} \\
     \hat{\beta}^{(t)} & = \hat{\beta}^{(t-1)} + \alpha^{(t)} e^{(t)}
@@ -107,6 +107,30 @@ Also, $e^{(t)}$ is a scalar and represents the prediction error on $y_j$ at time
 
 \section{Architecture and Spark implementation}
 
+In figure \ref{architecture}, both fully-vectorized and distributed approaches are shown.
+Note that in both approaches, the algorithm is scalable with respect to the number of models.
+This means that all models are run in parallel, regardless of the approach used.
+Transformations in the vectorized approach are
+represented by plain lines and transformations in the distributed approach are represented by dashed lines.
+In both approaches, the DStream is first transformed using a map transformation, as indicated by transformation (1).
+Transformation (1) converts messages received from Kafka to key/value pairs where the key is the name of the model
+and the value is a NumPy array containing the numerical values present in the messages.
+
+Initial RLS states are all initialized with zero coefficients for matrix $B$ and the identity matrix for matrix $V$.
+A full state refers to a state related the whole coefficient matrix $B$ of a model,
+while a partial state is related to only a specific column of $B$.
+In the distributed approach, each initial state is split into $m$ partial states with transformation (3) beforehand.
+Note that all partial states share the same key as the original full state.
+These partial states are then updated by performing a RLS step in parallel, as indicated by transformation (4).
+In the vectorized approach, the full states are updated by performing a RLS step in a vectorized fashion
+as indicated by transformation (2).
+
+In the distributed approach, full states are reconstructed with a groupByKey operation directly followed by a map operation.
+These two transformations are represented by the single transformation (5).
+Transformation (6) is a generic map transformation used for retrieving information and eventually displaying it,
+like the prediction error. For more details on the implementation of each transformation, please refer to the
+*KafkaReceiveRLS.ipynb* notebook.
+
 \begin{figure}[H]
     \begin{center}
         \includegraphics[width=\textwidth, keepaspectratio]{imgs/lineage-graph.png}
@@ -116,4 +140,5 @@ Also, $e^{(t)}$ is a scalar and represents the prediction error on $y_j$ at time
         \label{architecture}
     \end{center}
 \end{figure}
+
 

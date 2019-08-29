@@ -30,6 +30,7 @@ notebooks:
         This design choice allows for maximum flexibility.
 \end{itemize}
 
-Data samples are sent by a Kafka producer and retrieved by a Kafka consumer
-as a Spark DStream. The later is then update the models' coefficients
+Data samples are sent by a Kafka~\cite{kreps2011kafka} producer, retrieved by a Kafka
+consumer and fed as input to a Spark~\cite{zaharia2010spark} DStream.
+The later is then update the models' coefficients
 in a distributed manner. 
